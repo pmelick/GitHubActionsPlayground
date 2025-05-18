@@ -11,7 +11,6 @@ on:
 jobs:
   test:
     name: Test job
-    if: github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       pull-requests: write
@@ -24,22 +23,5 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
       unreal_version: ${{ matrix.unreal_version }}
-    secrets: inherit
-
-  test_fork:
-    name: Test job from fork
-    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository
-    permissions:
-      contents: read
-      pull-requests: write
-    uses: ./.github/workflows/reusable_workflow.yml
-    strategy:
-      matrix:
-        platform: [ ubuntu-22.04 ]
-        unreal_version: [ 5.5.4 ]
-      fail-fast: false
-    with:
-      platform: ${{ matrix.platform }}
-      unreal_version: ${{ matrix.unreal_version }}
-      environment: protected-workflow-environment
+      environment: ${{ github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository && 'protected-workflow-environment' || '' }}
     secrets: inherit
